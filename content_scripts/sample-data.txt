@@ -1,0 +1,22 @@
+//{"chat":{"thread":"{info.ThreadId}","vpos":{vpos},"mail":"{command}","ticket":"{ticket}","user_id":"{info.UserId}","content":"{content}","postkey":"{postKey}"}}
+
+//{"chat":{"thread":"{info.ThreadId}","vpos":{vpos},"mail":"{command}","ticket":"{ticket}","user_id":"{info.UserId}","content":"{content}","postkey":"{postKey}"}}
+
+//{"chat":{"thread":{ThreadId},"vpos":2812853,"date":1522395534,"date_usec":911780,"mail":"184","user_id":"{UserId}","anonymity":1,"locale":"ja-jp","content":"{ChatText}"}}
+
+/*{
+	"chat": {
+	"thread": "M.7XH9Kuc_qhyPl0iT-T8D0Q",
+	"no": 1,
+	"vpos": 54100,
+	"date": 1622217825,
+	"date_usec": 480955,
+	"user_id": "115879928",
+	"premium": 3,
+	"content": "test",
+	"yourpost": 1
+}*/
+
+//{"chat":{"thread":"M.IU1gsKNIbJtDnMBjxMh2rw","vpos":1146374,"mail":"","ticket":"e1561f30","user_id":"115879928","content":"hi","postkey":"T.Y5hr8Maqve6v37ODZSI_Hbp0U0jPn3M_S8So6e7BaeQkSBLOGQNeFGXV"}}
+
+nnnwsbc.send('comment', `[{"ping":{"content":"rs:0"}},{"ping":{"content":"ps:0"}},{"chat":{"thread":"${thread.threadId}","vpos":${liveData.program.openTime * 1000 - Date.now()},"mail":"","ticket":"${commentThread.ticket}","user_id":"${liveData.user.id}","content":"hi","postkey":"${thread.threadKey}"}},{"ping":{"content":"pf:0"}},{"ping":{"content":"rf:0"}}]`);

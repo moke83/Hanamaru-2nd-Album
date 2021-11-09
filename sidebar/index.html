@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+	<head>
+		<meta charset="utf-8">
+		<title>Sidebar</title>
+		<script src="../assets/js/utils.js"></script>
+		<script src="custom-elements.js"></script>
+	</head>
+	<body>
+		
+		<template id="comment-node">
+			<div>
+				<div class="no"><slot name="no"></slot></div>
+				<div class="user"><slot name="user"></slot></div>
+				<div class="time"><slot name="time"></slot></div>
+				<div class="content"><slot name="content"></slot></div>
+			</div>
+		</template>
+		<template id="user-node">
+			<div>
+				<div class="user_id"><slot name="user_id"></slot></div>
+				<div class="user_icon"><slot name="user_icon"></slot></div>
+				<div class="user_name"><slot name="user_name"></slot></div>
+			</div>
+		</template>
+		
+		<hanamaru-2nd-album>
+			<thread-node>
+				<user-list></user-list>
+				<chat-log></chat-log>
+			</thread-node>
+		</hanamaru-2nd-album>
+		
+	</body>
+</html>

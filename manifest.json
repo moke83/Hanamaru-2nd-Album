@@ -1,0 +1,27 @@
+{
+	
+	"manifest_version": 2,
+	"name": "hanamaru 2nd Album",
+	"short_name": "H2",
+	"permissions": [ "*://live.nicovideo.jp/watch/*", "notifications", "storage" ],
+	"version": "0.0",
+	"description": "",
+	
+	"background": {
+		"page": "background/index.html"
+	},
+	"browser_action": {},
+	"content_scripts": [
+		{
+			"matches": [ "*://live.nicovideo.jp/watch/*" ],
+			"js": [ "assets/js/utils.js", "content_scripts/objects.js", "content_scripts/main.js" ]
+		}
+	],
+	//"sidebar_action": {
+	//	"default_title": "hanamaru 2nd Album",
+	//	"default_panel": "sidebar/index.html"
+	//},
+	
+	"icons": {}
+	
+}
