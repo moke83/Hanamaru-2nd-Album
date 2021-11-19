@@ -79,7 +79,7 @@ toJSON = obj => {
 	return data || 'null';
 };
 // WebExtensions 用のユーティリティー
-WX_META = (window.browser || browser) && browser.runtime.getManifest(),
+WX_META = (window.browser || typeof browser !== 'undefined') && browser.runtime.getManifest(),
 WX_SHORT_NAME = WX_META && WX_META.short_name.toUpperCase(),
 
 createLog = (self, label = WX_SHORT_NAME || '') => console.log.bind(console, `[${label}#${self}]`),
@@ -122,7 +122,14 @@ class ExtensionNode extends HTMLElement {
 		(movedNodesInit = this.__.movedNodesObserverInit) && typeof movedNodesInit === 'object' &&
 			(
 				(movedNodesInit = structuredClone(movedNodesInit)).childList = true,
-				(this.movedNodesObserver = new MutaionObserver(this.observedMovedNodes)).observe(this, movedNodesInit)
+				this.movedNodesObserverOptions = {
+					subtree: movedNodesInit?.subtree,
+					closest: typeof movedNodesInit?.closest === 'string' && movedNodesInit.closest,
+					matches: typeof movedNodesInit?.matches === 'string' && movedNodesInit.matches,
+					added: [],
+					removed: []
+				},
+				(this.movedNodesObserver = new MutationObserver(this.observedMovedNodes)).observe(this, movedNodesInit)
 			),
 		
 		this.available = new Promise(rs => this.resolveSelf = rs);
@@ -330,7 +337,7 @@ class ExtensionNode extends HTMLElement {
 		
 		if (!data) return;
 		
-		let i,l,i0,k, child, contents,isStr;
+		let i,l,i0,k, elm, contents,isStr;
 		
 		if (Array.isArray(data)) {
 			
@@ -357,12 +364,16 @@ class ExtensionNode extends HTMLElement {
 			if (isObj(data.attr)) for (k in data.attr) elm.setAttribute(k, data.attr[k]);
 			if (isObj(data.style)) for (k in data.style) elm.style.setProperty(k, data.style[k]);
 			
-			data.children && ExtensionNode.construct(data.children, elm),
+			data.children && ExtensionNode.construct(data.children, elm);
 			
-			i = -1, l = (Array.isArray(contents = data.contents) || (contents = [ contents ])).length;
-			while (++i < l)
-				elm[`insertAdjacent${(isStr = isObj(contents[i])) || contents[i].is !== 'text' ? 'HTML' : 'Text'}`]
-					(isStr ? 'afterbegin' : contents[i].position || 'afterbegin', isStr ? contents[i] : contents[i].$);
+			if ('contents' in data) {
+				
+				i = -1, l = (Array.isArray(contents = data.contents) || (contents = [ contents ])).length;
+				while (++i < l) 
+					elm[`insertAdjacent${(isStr = !isObj(contents[i])) || contents[i].is !== 'text' ? 'HTML' : 'Text'}`]
+						(isStr ? 'afterbegin' : contents[i].position || 'afterbegin', isStr ? contents[i] : contents[i].$);
+				
+			}
 			
 		}
 		
@@ -418,7 +429,7 @@ class ExtensionNode extends HTMLElement {
 			
 		},
 		
-		// 要素に追加、削除された子要素に対して、継承先で実装されたコールバック関数 addedChild, removedChild を実行する。
+		// 要素に追加、削除された子要素に対して、継承先で実装されたコールバック関数 addedChildren, removedChildren を実行する。
 		// コールバック関数には、それぞれの該当する子要素を列挙した配列が引数に渡される。
 		// このオブザーバーは、継承先にアクセサリー movedNodesObserverInit を設定することで作成される。
 		// movedNodesObserverInit は mutationObserverInit と同等だが、childList が自動的に true で補完される。
@@ -430,35 +441,23 @@ class ExtensionNode extends HTMLElement {
 		observedMovedNodes(mrs) {
 			
 			const	movedNodes = ExtensionNode.getMovedNodesFromMR(mrs),
-					{ subtree, closest, matches, addedChildren, removedChildren } = this.__.movedNodesObserverOptions,
-					addedChild = typeof this.addedChild === 'function' && this.addedChild,
-					removedChild = typeof this.removedChild === 'function' && this.removedChild;
+					{ subtree, closest, matches, added, removed } = this.movedNodesObserverOptions,
+					execAdded = typeof this.addedChildren === 'function',
+					execRemoved = typeof this.removedChildren === 'function';
 			let ai,ri, movedNode;
 			
-			ai = ri = -1, addedChildren.length = removedChildren.length = 0;
-			for (movedNode of movedNodes)
+			ai = ri = -1, added.length = removed.length = 0;
+			for (movedNode of movedNodes) movedNode.nodeType === 1 && (
 				(movedNode.parentElement === this || (subtree && this.contains(movedNode))) ?
-					addedChild && (!closest || movedNode.closest(closest)) && (!matches || movedNode.matches(matches)) &&
-						(addedChildren[++ai] = movedNode) :
-					removedChild && (!closest || movedNode.closest(closest)) && (!matches || movedNode.matches(matches)) &&
-						(removedChildren[++ri] = movedNode);
+					execAdded && (!closest || movedNode.closest(closest)) && (!matches || movedNode.matches(matches)) &&
+						(added[++ai] = movedNode) :
+					execRemoved && (!closest || movedNode.closest(closest)) && (!matches || movedNode.matches(matches)) &&
+						(removed[++ri] = movedNode)
+			);
 			
-			addedChild && addedChild(addedChildren), removedChild && removedChild(removedChildren);
+			execAdded && this.addedChildren(added), execRemoved && this.removedChildren(removed);
 			
 		}
-		
-	};
-	static {
-		
-		const movedNodesObserverInit = this.__?.movedNodesObserverInit;
-		
-		this.movedNodesObserverOptions = {
-			subtree: movedNodesObserverInit?.subtree,
-			closest: typeof movedNodesObserverInit?.closest === 'string' && movedNodesObserverInit.closest,
-			matches: typeof movedNodesObserverInit?.matches === 'string' && movedNodesObserverInit.matches,
-			addedChildren: [],
-			removedChildren: []
-		};
 		
 	};
 	//static movedNodesObserverInit = { childList: true, subtree: true, closest: true };
